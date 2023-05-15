@@ -1,10 +1,14 @@
 from alembic.autogenerate import renderers
 from alembic.operations import MigrateOperation, Operations
 
-from postgresql_audit.utils import create_audit_table, create_operators, render_tmpl
+from postgresql_audit.utils import (
+    create_audit_table,
+    create_operators,
+    render_tmpl
+)
 
 
-@Operations.register_operation("init_activity_table_triggers")
+@Operations.register_operation('init_activity_table_triggers')
 class InitActivityTableTriggersOp(MigrateOperation):
     """Initialize Activity Table Triggers"""
 
@@ -16,7 +20,9 @@ class InitActivityTableTriggersOp(MigrateOperation):
     def init_activity_table_triggers(
         cls, operations, use_statement_level_triggers, **kwargs
     ):
-        op = InitActivityTableTriggersOp(use_statement_level_triggers, **kwargs)
+        op = InitActivityTableTriggersOp(
+            use_statement_level_triggers, **kwargs
+        )
         return operations.invoke(op)
 
     def reverse(self):
@@ -26,7 +32,7 @@ class InitActivityTableTriggersOp(MigrateOperation):
         )
 
 
-@Operations.register_operation("remove_activity_table_triggers")
+@Operations.register_operation('remove_activity_table_triggers')
 class RemoveActivityTableTriggersOp(MigrateOperation):
     """Drop Activity Table Triggers"""
 
@@ -52,9 +58,9 @@ def init_activity_table_triggers(operations, operation):
     bind = conn.get_bind()
 
     if operation.schema:
-        conn.execute(render_tmpl("create_schema.sql", operation.schema))
+        conn.execute(render_tmpl('create_schema.sql', operation.schema))
 
-    conn.execute(render_tmpl("jsonb_change_key_name.sql", operation.schema))
+    conn.execute(render_tmpl('jsonb_change_key_name.sql', operation.schema))
     create_audit_table(
         None, bind, operation.schema, operation.use_statement_level_triggers
     )

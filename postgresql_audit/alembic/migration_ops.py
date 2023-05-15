@@ -4,18 +4,24 @@ from alembic.operations import MigrateOperation, Operations
 from postgresql_audit import add_column, remove_column
 
 
-@Operations.register_operation("add_column_to_activity")
+
+@Operations.register_operation('add_column_to_activity')
 class AddColumnToActivityOp(MigrateOperation):
     """Initialize Activity Table Triggers"""
 
-    def __init__(self, table_name, column_name, default_value=None, schema=None):
+    def __init__(
+        self, table_name, column_name, default_value=None, schema=None
+    ):
         self.schema = schema
         self.table_name = table_name
         self.column_name = column_name
         self.default_value = default_value
 
     @classmethod
-    def add_column_to_activity(cls, operations, table_name, column_name, **kwargs):
+
+    def add_column_to_activity(
+        cls, operations, table_name, column_name, **kwargs
+    ):
         op = AddColumnToActivityOp(table_name, column_name, **kwargs)
         return operations.invoke(op)
 
@@ -25,23 +31,29 @@ class AddColumnToActivityOp(MigrateOperation):
             self.table_name,
             self.column_name,
             default_value=self.default_value,
-            schema=self.schema,
+            schema=self.schema
         )
 
 
-@Operations.register_operation("remove_column_from_activity")
+@Operations.register_operation('remove_column_from_activity')
 class RemoveColumnFromRemoveActivityOp(MigrateOperation):
     """Drop Activity Table Triggers"""
 
-    def __init__(self, table_name, column_name, default_value=None, schema=None):
+    def __init__(
+        self, table_name, column_name, default_value=None, schema=None
+    ):
         self.schema = schema
         self.table_name = table_name
         self.column_name = column_name
         self.default_value = default_value
 
     @classmethod
-    def remove_column_from_activity(cls, operations, table_name, column_name, **kwargs):
-        op = RemoveColumnFromRemoveActivityOp(table_name, column_name, **kwargs)
+    def remove_column_from_activity(
+        cls, operations, table_name, column_name, **kwargs
+    ):
+        op = RemoveColumnFromRemoveActivityOp(
+            table_name, column_name, **kwargs
+        )
         return operations.invoke(op)
 
     def reverse(self):
@@ -50,7 +62,7 @@ class RemoveColumnFromRemoveActivityOp(MigrateOperation):
             self.table_name,
             self.column_name,
             default_value=self.default_value,
-            schema=self.schema,
+            schema=self.schema
         )
 
 
