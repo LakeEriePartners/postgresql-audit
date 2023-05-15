@@ -38,6 +38,7 @@ Running the tests
     git clone https://github.com/kvesteri/postgresql-audit.git
     cd postgresql-audit
     pip install tox
+    createdb postgresql_audit_test
     tox
 
 
@@ -110,7 +111,7 @@ Now we can check the newly created activity.
     activity.changed_data   # None
 
 
-
+.. |Build Status| image:: https://github.com/kvesteri/postgresql-audit/actions/workflows/test.yml/badge.svg?branch=master
 .. |Version Status| image:: https://img.shields.io/pypi/v/PostgreSQL-Audit.svg
    :target: https://pypi.python.org/pypi/PostgreSQL-Audit/
 .. |Downloads| image:: https://img.shields.io/pypi/dm/PostgreSQL-Audit.svg
