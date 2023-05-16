@@ -3,7 +3,8 @@ from alembic.autogenerate import renderers
 from alembic.operations import MigrateOperation, Operations
 
 
-@Operations.register_operation('register_for_version_tracking')
+@Operations.register_operation("register_for_version_tracking")
+
 class RegisterTableForVersionTrackingOp(MigrateOperation):
     """Register Table for Version Tracking"""
 
@@ -33,6 +34,7 @@ class RegisterTableForVersionTrackingOp(MigrateOperation):
         return DeregisterTableForVersionTrackingOp(
             self.tablename, self.original_excluded_columns, schema=self.schema
         )
+
 
 
 @Operations.register_operation('deregister_for_version_tracking')
@@ -72,6 +74,7 @@ def register_for_version_tracking(operations, operation):
 @Operations.implementation_for(DeregisterTableForVersionTrackingOp)
 def deregister_for_version_tracking(operations, operation):
     operations.execute(
+
         f'drop trigger if exists audit_trigger_insert on {operation.tablename}'
     )
     operations.execute(
@@ -87,6 +90,7 @@ def deregister_for_version_tracking(operations, operation):
 
 @renderers.dispatch_for(RegisterTableForVersionTrackingOp)
 def render_register_for_version_tracking(autogen_context, op):
+
     return 'op.register_for_version_tracking(%r, %r, **%r)' % (
         op.tablename,
         op.excluded_columns,
@@ -96,6 +100,7 @@ def render_register_for_version_tracking(autogen_context, op):
 
 @renderers.dispatch_for(DeregisterTableForVersionTrackingOp)
 def render_deregister_for_version_tracking(autogen_context, op):
+
     return 'op.deregister_for_version_tracking(%r, **%r)' % (
         op.tablename,
         {'schema': op.schema}

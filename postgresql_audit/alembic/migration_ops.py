@@ -4,6 +4,7 @@ from alembic.operations import MigrateOperation, Operations
 from postgresql_audit import add_column, remove_column
 
 
+
 @Operations.register_operation('add_column_to_activity')
 class AddColumnToActivityOp(MigrateOperation):
     """Initialize Activity Table Triggers"""
@@ -17,6 +18,7 @@ class AddColumnToActivityOp(MigrateOperation):
         self.default_value = default_value
 
     @classmethod
+
     def add_column_to_activity(
         cls, operations, table_name, column_name, **kwargs
     ):
@@ -71,33 +73,30 @@ def add_column_to_activity(operations, operation):
         operation.table_name,
         operation.column_name,
         default_value=operation.default_value,
-        schema=operation.schema
+        schema=operation.schema,
     )
 
 
 @Operations.implementation_for(RemoveColumnFromRemoveActivityOp)
 def remove_column_from_activity(operations, operation):
     remove_column(
-        operations,
-        operation.table_name,
-        operation.column_name,
-        operation.schema
+        operations, operation.table_name, operation.column_name, operation.schema
     )
 
 
 @renderers.dispatch_for(AddColumnToActivityOp)
 def render_add_column_to_activity(autogen_context, op):
-    return 'op.add_column_to_activity(%r, %r, **%r)' % (
+    return "op.add_column_to_activity(%r, %r, **%r)" % (
         op.table_name,
         op.column_name,
-        {'schema': op.schema, 'default_value': op.default_value}
+        {"schema": op.schema, "default_value": op.default_value},
     )
 
 
 @renderers.dispatch_for(RemoveColumnFromRemoveActivityOp)
 def render_remove_column_from_activitys(autogen_context, op):
-    return 'op.remove_column_from_activity(%r, %r, **%r)' % (
+    return "op.remove_column_from_activity(%r, %r, **%r)" % (
         op.table_name,
         op.column_name,
-        {'schema': op.schema}
+        {"schema": op.schema},
     )

@@ -73,46 +73,43 @@ def remove_activity_table_triggers(operations, operation):
     bind = conn.get_bind()
 
     if operation.schema:
-        conn.execute(render_tmpl('drop_schema.sql', operation.schema))
+        conn.execute(render_tmpl("drop_schema.sql", operation.schema))
 
     conn.execute(
-        'DROP FUNCTION jsonb_change_key_name('
-        'data jsonb, old_key text, new_key text)'
+        "DROP FUNCTION jsonb_change_key_name(" "data jsonb, old_key text, new_key text)"
     )
-    schema_prefix = f'{operation.schema}.' if operation.schema else ''
+    schema_prefix = f"{operation.schema}." if operation.schema else ""
 
     conn.execute(
-        f'DROP FUNCTION {schema_prefix}audit_table('
-        'target_table regclass, ignored_cols text[])'
+        f"DROP FUNCTION {schema_prefix}audit_table("
+        "target_table regclass, ignored_cols text[])"
     )
-    conn.execute(f'DROP FUNCTION {schema_prefix}create_activity()')
+    conn.execute(f"DROP FUNCTION {schema_prefix}create_activity()")
 
     if bind.dialect.server_version_info < (9, 5, 0):
-        conn.execute('DROP FUNCTION jsonb_subtract(jsonb,  TEXT)')
-        conn.execute('DROP OPERATOR IF EXISTS - (jsonb, text);')
-        conn.execute('DROP FUNCTION jsonb_merge(jsonb, jsonb)')
-        conn.execute('DROP OPERATOR IF EXISTS || (jsonb, jsonb);')
+        conn.execute("DROP FUNCTION jsonb_subtract(jsonb,  TEXT)")
+        conn.execute("DROP OPERATOR IF EXISTS - (jsonb, text);")
+        conn.execute("DROP FUNCTION jsonb_merge(jsonb, jsonb)")
+        conn.execute("DROP OPERATOR IF EXISTS || (jsonb, jsonb);")
     if bind.dialect.server_version_info < (9, 6, 0):
-        conn.execute('DROP FUNCTION current_setting(TEXT, BOOL)')
+        conn.execute("DROP FUNCTION current_setting(TEXT, BOOL)")
     if bind.dialect.server_version_info < (10, 0):
-        conn.execute('DROP FUNCTION jsonb_subtract(jsonb, TEXT[])')
-        conn.execute('DROP OPERATOR IF EXISTS - (jsonb, text[])')
+        conn.execute("DROP FUNCTION jsonb_subtract(jsonb, TEXT[])")
+        conn.execute("DROP OPERATOR IF EXISTS - (jsonb, text[])")
 
-    conn.execute('DROP OPERATOR IF EXISTS - (jsonb, jsonb)')
-    conn.execute('DROP FUNCTION get_setting(text, text)')
-    conn.execute('DROP FUNCTION jsonb_subtract(jsonb,jsonb)')
+    conn.execute("DROP OPERATOR IF EXISTS - (jsonb, jsonb)")
+    conn.execute("DROP FUNCTION get_setting(text, text)")
+    conn.execute("DROP FUNCTION jsonb_subtract(jsonb,jsonb)")
 
 
 @renderers.dispatch_for(InitActivityTableTriggersOp)
 def render_init_activity_table_triggers(autogen_context, op):
-    return 'op.init_activity_table_triggers(%r, **%r)' % (
+    return "op.init_activity_table_triggers(%r, **%r)" % (
         op.use_statement_level_triggers,
-        {'schema': op.schema}
+        {"schema": op.schema},
     )
 
 
 @renderers.dispatch_for(RemoveActivityTableTriggersOp)
 def render_remove_activity_table_triggers(autogen_context, op):
-    return 'op.remove_activity_table_triggers(**%r)' % (
-        {'schema': op.schema}
-    )
+    return "op.remove_activity_table_triggers(**%r)" % ({"schema": op.schema})

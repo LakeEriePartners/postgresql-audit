@@ -1,9 +1,7 @@
-from __future__ import absolute_import
-
 from contextlib import contextmanager
 from copy import copy
 
-from flask import g, has_request_context, request
+from flask import g, request
 
 from .base import VersioningManager as BaseVersioningManager
 
@@ -13,7 +11,7 @@ class VersioningManager(BaseVersioningManager):
 
     def get_transaction_values(self):
         values = copy(self.values)
-        if has_request_context() and hasattr(g, 'activity_values'):
+        if g and hasattr(g, 'activity_values'):
             values.update(g.activity_values)
         if (
             'client_addr' not in values and
@@ -31,10 +29,6 @@ class VersioningManager(BaseVersioningManager):
     def default_actor_id(self):
         from flask_login import current_user
 
-        # Return None if we are outside of request context.
-        if not has_request_context():
-            return
-
         try:
             return current_user.id
         except AttributeError:
@@ -43,9 +37,7 @@ class VersioningManager(BaseVersioningManager):
     @property
     def default_client_addr(self):
         # Return None if we are outside of request context.
-        if not has_request_context():
-            return
-        return request.remote_addr or None
+        return (request and request.remote_addr) or None
 
 
 def merge_dicts(a, b):
@@ -56,7 +48,8 @@ def merge_dicts(a, b):
 
 @contextmanager
 def activity_values(**values):
-    if not has_request_context():
+    if not g:
+        yield  # Needed for contextmanager
         return
     if hasattr(g, 'activity_values'):
         previous_value = g.activity_values
