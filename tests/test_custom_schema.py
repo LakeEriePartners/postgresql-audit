@@ -2,7 +2,7 @@
 
 import pytest
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from postgresql_audit import VersioningManager
 
@@ -14,49 +14,11 @@ def schema_name():
     return 'audit'
 
 
-@pytest.fixture
-def versioning_manager(base, schema_name):
-    vm = VersioningManager(schema_name=schema_name)
-    vm.init(base)
-    yield vm
-    vm.remove_listeners()
-
-
-@pytest.fixture
-def activity_cls(versioning_manager):
-    yield versioning_manager.activity_cls
-
-
-@pytest.fixture()
-def table_creator(
-    base,
-    connection,
-    session,
-    models,
-    versioning_manager,
-    schema_name
-):
-    sa.orm.configure_mappers()
-    with connection.begin():
-        connection.execute(
-            sa.text(
-                'DROP SCHEMA IF EXISTS {} CASCADE'.format(schema_name)
-            )
-        )
-        versioning_manager.transaction_cls.__table__.create(connection)
-        versioning_manager.activity_cls.__table__.create(connection)
-        base.metadata.create_all(connection)
-
-    yield
-    session.expunge_all()
-    base.metadata.drop_all(connection)
-    session.commit()
-
-
 @pytest.mark.usefixtures('versioning_manager', 'table_creator')
 class TestCustomSchemaactivityCreation(object):
-    def test_insert(self, user, connection, schema_name):
-        activity = last_activity(connection, schema=schema_name)
+    def test_insert(self, user, engine, schema_name):
+        with engine.begin() as connection:
+            activity = last_activity(connection, schema=schema_name)
         assert activity['old_data'] == {}
         assert activity['changed_data'] == {
             'id': user.id,

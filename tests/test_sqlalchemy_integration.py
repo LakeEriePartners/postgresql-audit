@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base, synonym_for
+from sqlalchemy.orm import declarative_base, synonym_for
 
 from postgresql_audit import VersioningManager
 
@@ -12,8 +12,9 @@ from .utils import last_activity
 
 @pytest.mark.usefixtures('versioning_manager', 'table_creator')
 class TestActivityCreation(object):
-    def test_insert(self, user, connection):
-        activity = last_activity(connection)
+    def test_insert(self, user, engine):
+        with engine.begin() as connection:
+            activity = last_activity(connection)
         assert activity['old_data'] == {}
         assert activity['changed_data'] == {
             'id': user.id,
