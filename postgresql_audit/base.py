@@ -19,7 +19,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_utils import get_class_by_table
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-cached_statements = {}
 
 
 class ImproperlyConfigured(Exception):
@@ -28,16 +27,6 @@ class ImproperlyConfigured(Exception):
 
 class ClassNotVersioned(Exception):
     pass
-
-
-class StatementExecutor(object):
-    def __init__(self, stmt):
-        self.stmt = stmt
-
-    def __call__(self, target, bind, **kwargs):
-        tx = bind.begin()
-        bind.execute(self.stmt)
-        tx.commit()
 
 
 def read_file(file_):
@@ -220,7 +209,7 @@ class VersioningManager(object):
     def render_tmpl(self, tmpl_name):
         file_contents = read_file(
             'templates/{}'.format(tmpl_name)
-        ).replace('%', '%%').replace('$$', '$$$$')
+        ).replace('$$', '$$$$')
         tmpl = string.Template(file_contents)
         context = dict(schema_name=self.schema_name)
 
@@ -237,8 +226,7 @@ class VersioningManager(object):
         return temp
 
     def create_operators(self, target, bind, **kwargs):
-        operators_template = self.render_tmpl('operators.sql')
-        StatementExecutor(operators_template)(target, bind, **kwargs)
+        bind.execute(text(self.render_tmpl('operators.sql')))
 
     def create_audit_table(self, target, bind, **kwargs):
         sql = ''
@@ -248,7 +236,7 @@ class VersioningManager(object):
         else:
             sql += self.render_tmpl('create_activity_row_level.sql')
             sql += self.render_tmpl('audit_table_row_level.sql')
-        StatementExecutor(sql)(target, bind, **kwargs)
+        bind.execute(text(sql))
 
     def get_table_listeners(self):
         listeners = {'transaction': []}
@@ -289,11 +277,10 @@ class VersioningManager(object):
         else:
             func = getattr(getattr(sa.func, self.schema_name), 'audit_table')
         query = sa.select(func(*args))
-        if query not in cached_statements:
-            cached_statements[query] = StatementExecutor(query)
-        listener = (table, 'after_create', cached_statements[query])
-        if not sa.event.contains(*listener):
-            sa.event.listen(*listener)
+
+        @sa.event.listens_for(table, 'after_create')
+        def receive_after_create(target, connection, **kw):
+            connection.execute(query)
 
     def set_activity_values(self, session):
         transaction_mapper = sa.inspect(self.transaction_cls)

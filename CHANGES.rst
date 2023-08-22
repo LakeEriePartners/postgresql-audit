@@ -3,11 +3,18 @@ Changelog
 
 Here you can see the full list of changes between each PostgreSQL-Audit release.
 
-0.16.0 (not yet released)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Unreleased
+^^^^^^^^^^
+
+- Use the ``pyproject.toml`` standard to specify project metadata, dependencies and tool configuration. Use Hatch to build the project.
+
+0.16.0 (2023-08-04)
+^^^^^^^^^^^^^^^^^^^
 
 - **BREAKING CHANGE**: Drop support for PostgreSQL 9.5, 9.6 and 10, which have reached end of their lives.
+- Add support for SQLAlchemy 2.0
 - Remove unused ``VersioningManager.cached_ddls`` attribute
+- Removed redundant statement caching from ``VersioningManager.audit_table``
 
 0.15.0 (2023-05-15)
 ^^^^^^^^^^^^^^^^^^^
