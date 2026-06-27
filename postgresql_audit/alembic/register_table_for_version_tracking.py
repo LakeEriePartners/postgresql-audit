@@ -66,7 +66,7 @@ def register_for_version_tracking(operations, operation):
         func = getattr(getattr(sa.func, operation.schema), 'audit_table')
     operations.execute(
         sa.select(
-            [func(operation.tablename, list(operation.excluded_columns))]
+            func(operation.tablename, list(operation.excluded_columns))
         )
     )
 
